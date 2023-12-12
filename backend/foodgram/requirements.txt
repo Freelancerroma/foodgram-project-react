@@ -1,0 +1,16 @@
+asgiref==3.7.2
+Django==5.0
+django-filter==23.5
+djangorestframework==3.14.0
+drf-extra-fields==3.2.1
+filetype==1.2.0
+flake8==6.1.0
+mccabe==0.7.0
+Pillow==10.1.0
+psycopg2-binary==2.9.5
+pycodestyle==2.11.1
+pyflakes==3.1.0
+python-dotenv==1.0.0
+pytz==2023.3.post1
+sqlparse==0.4.4
+tzdata==2023.3
