@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status
+from rest_framework import status, mixins, viewsets
 from rest_framework.response import Response
 
-from .models import Favorite, ShoppingCart
+from recipes.models import Favorite, ShoppingCart
 from users.models import Follow
 
 
@@ -63,3 +63,17 @@ class AddDeleteMixin:
             **as_key
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+
+
+
+class ListCreateRetrieveViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """ViewSet для методов Get, List, Create, Retrieve."""
+
+    lookup_field = 'id'
