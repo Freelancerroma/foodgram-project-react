@@ -130,3 +130,11 @@ dmypy.json
 
 # .idea
 .idea
+
+# Other
+backend/foodgram/users/serializers.py
+backend/foodgram/users/views.py
+backend/foodgram/users/mixins.py
+backend/foodgram/recipes/serializers.py
+backend/foodgram/recipes/views.py
+backend/foodgram/recipes/mixins.py
