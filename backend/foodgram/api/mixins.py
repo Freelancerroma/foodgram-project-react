@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status, mixins, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.response import Response
 
 from recipes.models import Favorite, ShoppingCart
@@ -63,9 +63,6 @@ class AddDeleteMixin:
             **as_key
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
-
-
 
 
 class ListCreateRetrieveViewSet(

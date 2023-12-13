@@ -1,35 +1,22 @@
-from .serializers import (
-    TagSerializer,
-    IngredientSerializer,
-    RecipeReadSerializer,
-    RecipeWriteSerializer,
-    RecipeInListSerializer
-)
-from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
-from rest_framework import viewsets, filters, permissions
-from users.permissions import AuthorOrRead
-from .mixins import AddDeleteMixin
-from rest_framework.decorators import action
+from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
-
-
-from .mixins import ListCreateRetrieveViewSet
-from users.models import User
-from recipes.mixins import AddDeleteMixin
-from .serializers import (
-    UserSerializer,
-    FollowSerializer,
-    ChangePasswordSerializer,
-    UserRegistrationSerializer,
-    UserLoginSerializer
-)
-from rest_framework import filters, permissions, status
+from django.shortcuts import get_object_or_404
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from django.contrib.auth import get_user_model
-from rest_framework.authtoken.models import Token
+
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from users.models import User
+from users.permissions import AuthorOrRead
+from users.validators import ValidateUsername
+from .mixins import AddDeleteMixin, ListCreateRetrieveViewSet
+from .serializers import (ChangePasswordSerializer, FollowSerializer,
+                          IngredientSerializer, RecipeInListSerializer,
+                          RecipeReadSerializer, RecipeWriteSerializer,
+                          TagSerializer, UserLoginSerializer,
+                          UserRegistrationSerializer, UserSerializer)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -115,8 +102,9 @@ class RecipeViewSet(AddDeleteMixin, viewsets.ModelViewSet):
             'attachment; filename=shopping-list.txt'
         )
         return response
-    
-class UserViewSet(AddDeleteMixin, ListCreateRetrieveViewSet):
+
+
+class UserViewSet(AddDeleteMixin, ListCreateRetrieveViewSet, ValidateUsername):
     """ViewSet для работы с пользователями."""
 
     queryset = User.objects.all()
@@ -216,7 +204,7 @@ def login(request):
     if not user.check_password(serializer.validated_data.get('password')):
         return Response('Неверный пароль', status=status.HTTP_400_BAD_REQUEST)
     token, _ = Token.objects.get_or_create(user=user)
-    return Response({'auth_token': str(token)}, status=status.HTTP_201_CREATED)
+    return Response({'auth_token': str(token)}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

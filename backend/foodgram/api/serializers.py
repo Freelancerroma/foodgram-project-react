@@ -1,8 +1,9 @@
-from rest_framework import serializers
-from recipes.models import Tag, Ingredient, RecipeIngredient, Recipe
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+
 from foodgram import settings
-from users.models import User, Follow
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from users.models import Follow, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -119,7 +120,7 @@ class IngredientSerializer(serializers.ModelSerializer):
             'name',
             'measure_unit',
         )
-        read_only_fields = '__all__'
+        read_only_fields = ('__all__',)
 
 
 class RecipeIngredientReadSerializer(serializers.ModelSerializer):
@@ -144,7 +145,7 @@ class RecipeIngredientReadSerializer(serializers.ModelSerializer):
             'measure_unit',
             'amount',
         )
-        read_only_fields = '__all__'
+        read_only_fields = ('__all__',)
 
 
 class RecipeIngredientWriteSerializer(serializers.ModelSerializer):
@@ -195,7 +196,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         )
-        read_only_fields = '__all__'
+        read_only_fields = ('__all__',)
 
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
@@ -223,7 +224,7 @@ class RecipeInListSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time',
         )
-        read_only_fields = '__all__'
+        read_only_fields = ('__all__',)
 
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
@@ -287,7 +288,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return instance
 
     def to_representation(self, instance):
-        return RecipeReadSerializer(
+        return RecipeInListSerializer(
             instance,
             context={'request': self.context.get('request')}
         ).data
@@ -321,7 +322,7 @@ class FollowSerializer(serializers.ModelSerializer):
             'recipes',
             'recipes_count',
         )
-        read_only_fields = '__all__'
+        read_only_fields = ('__all__',)
 
     def get_recipes_count(self, following):
         return following.author.recipes.count()

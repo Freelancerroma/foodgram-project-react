@@ -1,13 +1,10 @@
-from django.db import models
-from users.models import User
-from foodgram.settings import (
-    NAME_LEN,
-    TAG_LEN,
-    HEX_LEN,
-    SLUG_LEN,
-    MEASURE_UNIT_LEN
-)
 from django.core.validators import MinValueValidator
+from django.db import models
+
+from foodgram.settings import (HEX_LEN, MEASURE_UNIT_LEN, NAME_LEN, SLUG_LEN,
+                               TAG_LEN)
+from users.models import User
+
 from .validators import ValidateColor
 
 
