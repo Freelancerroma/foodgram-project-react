@@ -94,13 +94,13 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'name',
-        'measure_unit',
+        'measurement_unit',
     )
     search_fields = (
         'name',
     )
     list_filter = (
-        'measure_unit',
+        'measurement_unit',
     )
 
 

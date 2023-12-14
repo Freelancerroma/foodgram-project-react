@@ -3,16 +3,17 @@ from django.db import models
 
 from foodgram import settings
 
-from .validators import ValidateUsername
+from .validators import validate_username
 
 
-class User(ValidateUsername, AbstractUser):
+class User(AbstractUser):
     """Модель пользователя."""
 
     username = models.CharField(
         verbose_name='Имя пользователя',
         max_length=settings.USERNAME_LEN,
         unique=True,
+        validators=[validate_username],
     )
     email = models.EmailField(
         verbose_name='Электронная почта',

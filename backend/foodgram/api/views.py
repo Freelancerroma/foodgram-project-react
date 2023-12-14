@@ -10,13 +10,15 @@ from rest_framework.response import Response
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from users.models import User
 from users.permissions import AuthorOrRead
-from users.validators import ValidateUsername
 from .mixins import AddDeleteMixin, ListCreateRetrieveViewSet
 from .serializers import (ChangePasswordSerializer, FollowSerializer,
                           IngredientSerializer, RecipeInListSerializer,
                           RecipeReadSerializer, RecipeWriteSerializer,
                           TagSerializer, UserLoginSerializer,
                           UserRegistrationSerializer, UserSerializer)
+from .filters import IngredientFilter, RecipeFilter
+
+from .paginators import RecipesPagination
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -31,8 +33,11 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
 
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
-    filter_backends = (filters.SearchFilter)
-    search_fields = ('name', '^name')
+    filter_backends = (IngredientFilter,)
+    search_fields = ('^name',)
+
+    def get_paginated_response(self, data):
+        return Response(data)
 
 
 class RecipeViewSet(AddDeleteMixin, viewsets.ModelViewSet):
@@ -42,6 +47,8 @@ class RecipeViewSet(AddDeleteMixin, viewsets.ModelViewSet):
     lookup_field = 'id'
     permission_classes = (AuthorOrRead,)
     ordering_fields = ('-pub_date',)
+    pagination_class = RecipesPagination
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         return (
@@ -83,17 +90,19 @@ class RecipeViewSet(AddDeleteMixin, viewsets.ModelViewSet):
         permission_classes=(permissions.IsAuthenticated,)
     )
     def download_cart(self, request):
-        cart = (RecipeIngredient.objects
-                .filter(recipe__cart__user=request.user)
-                .order_by('ingredient__name')
-                .values('ingredient__name', 'ingredient__measure_unit')
-                .annotate(amount=Sum('amount')))
+        cart = (
+            RecipeIngredient.objects
+            .filter(recipe__cart__user=request.user)
+            .order_by('ingredient__name')
+            .values('ingredient__name', 'ingredient__measurement_unit')
+            .annotate(amount=Sum('amount'))
+        )
         content = '\n'.join(
             [
                 (
                     f'{ol}. {ingredient["ingredient__name"]} '
                     f'{ingredient["amount"]} '
-                    f'{ingredient["ingredient__measure_unit"]}'
+                    f'{ingredient["ingredient__measurement_unit"]}'
                 ) for ol, ingredient in enumerate(list(cart), start=1)
             ]
         )
@@ -104,7 +113,7 @@ class RecipeViewSet(AddDeleteMixin, viewsets.ModelViewSet):
         return response
 
 
-class UserViewSet(AddDeleteMixin, ListCreateRetrieveViewSet, ValidateUsername):
+class UserViewSet(AddDeleteMixin, ListCreateRetrieveViewSet):
     """ViewSet для работы с пользователями."""
 
     queryset = User.objects.all()
@@ -171,8 +180,7 @@ class UserViewSet(AddDeleteMixin, ListCreateRetrieveViewSet, ValidateUsername):
         user.set_password(serializer.validated_data.get('new_password'))
         user.save()
         return Response(
-            'Пароль изменен',
-            status=status.HTTP_200_OK
+            status=status.HTTP_204_NO_CONTENT
         )
 
     def create(self, request):

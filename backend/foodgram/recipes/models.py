@@ -5,10 +5,10 @@ from foodgram.settings import (HEX_LEN, MEASURE_UNIT_LEN, NAME_LEN, SLUG_LEN,
                                TAG_LEN)
 from users.models import User
 
-from .validators import ValidateColor
+from .validators import validate_hex
 
 
-class Tag(ValidateColor, models.Model):
+class Tag(models.Model):
     """Модель тега."""
 
     name = models.CharField(
@@ -20,6 +20,7 @@ class Tag(ValidateColor, models.Model):
         verbose_name='Цвет тега',
         unique=True,
         max_length=HEX_LEN,
+        validators=[validate_hex],
     )
     slug = models.SlugField(
         verbose_name='Слаг тега',
@@ -43,7 +44,7 @@ class Ingredient(models.Model):
         verbose_name='Название ингредиента',
         max_length=NAME_LEN,
     )
-    measure_unit = models.CharField(
+    measurement_unit = models.CharField(
         verbose_name='Единица измерения',
         max_length=MEASURE_UNIT_LEN,
     )
@@ -54,7 +55,7 @@ class Ingredient(models.Model):
         verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
-        return f'{self.name} - {self.measure_unit}'
+        return f'{self.name} - {self.measurement_unit}'
 
 
 class Recipe(models.Model):
@@ -152,7 +153,7 @@ class RecipeIngredient(models.Model):
         return (
             f'{self.ingredient.name},'
             f'{self.amount}'
-            f'{self.ingredient.measure_unit}'
+            f'{self.ingredient.measurement_unit}'
         )
 
 
