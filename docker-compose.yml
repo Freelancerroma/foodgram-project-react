@@ -1,0 +1,42 @@
+version: '3'
+
+volumes:
+  database:
+  static_value:
+  media_value:
+
+services:
+
+  db:
+    image: postgres:13
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  backend:
+    build: ./backend/
+    env_file: .env
+    volumes:
+      - static_value:/app/static/
+      - media_value:/app/media/
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend/
+    env_file: .env
+    volumes:
+      - ./frontend/:/app/result_build/
+
+  gateway:
+    build: ./nginx/
+    env_file: .env
+    ports:
+      - 9090:80
+    volumes:
+      - static_value:/app/static/
+      - media_value:/app/media/
+    depends_on:
+      - backend
+    restart: always

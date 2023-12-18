@@ -10,15 +10,15 @@ from rest_framework.response import Response
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from users.models import User
 from users.permissions import AuthorOrRead
+
+from .filters import IngredientFilter, RecipeFilter
 from .mixins import AddDeleteMixin, ListCreateRetrieveViewSet
+from .paginators import IngredientPagination, RecipesPagination
 from .serializers import (ChangePasswordSerializer, FollowSerializer,
                           IngredientSerializer, RecipeInListSerializer,
                           RecipeReadSerializer, RecipeWriteSerializer,
                           TagSerializer, UserLoginSerializer,
                           UserRegistrationSerializer, UserSerializer)
-from .filters import IngredientFilter, RecipeFilter
-
-from .paginators import RecipesPagination
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -26,6 +26,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
+    pagination_class = IngredientPagination
 
 
 class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -35,9 +36,7 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     filter_backends = (IngredientFilter,)
     search_fields = ('^name',)
-
-    def get_paginated_response(self, data):
-        return Response(data)
+    pagination_class = IngredientPagination
 
 
 class RecipeViewSet(AddDeleteMixin, viewsets.ModelViewSet):
@@ -92,7 +91,7 @@ class RecipeViewSet(AddDeleteMixin, viewsets.ModelViewSet):
     def download_cart(self, request):
         cart = (
             RecipeIngredient.objects
-            .filter(recipe__cart__user=request.user)
+            .filter(recipe__carts__user=request.user)
             .order_by('ingredient__name')
             .values('ingredient__name', 'ingredient__measurement_unit')
             .annotate(amount=Sum('amount'))
@@ -120,6 +119,7 @@ class UserViewSet(AddDeleteMixin, ListCreateRetrieveViewSet):
     serializer_class = UserSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+    pagination_class = RecipesPagination
 
     @action(
         methods=['get'],

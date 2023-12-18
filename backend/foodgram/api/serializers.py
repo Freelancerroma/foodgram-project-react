@@ -1,13 +1,14 @@
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
 from foodgram import settings
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from users.models import Follow, User
 from users.validators import validate_username
-from rest_framework.exceptions import ValidationError
-from django.shortcuts import get_object_or_404
+
+
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор пользователя."""
 
@@ -295,8 +296,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return ingredients
 
     def validate_tags(self, tags):
-        if 'recipe_ingredients' not in validated_data:
-            raise serializers.ValidationError('Ингредиенты должны быть заданы.')        
         if not tags:
             raise serializers.ValidationError(
                 'Теги должны быть заданы.'
@@ -357,15 +356,20 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        if 'recipe_ingredients' not in validated_data:
-            raise serializers.ValidationError('Ингредиенты должны быть заданы.')
-        if validated_data.get('tags'):
+
+        if 'tags' in validated_data:
             instance.tags.clear()
             instance.tags.set(validated_data.pop('tags'))
-        if validated_data.get('recipe_ingredients'):
+        else:
+            raise ValidationError('Отсутствует поле tags.')
+
+        if 'recipe_ingredients' in validated_data:
             RecipeIngredient.objects.filter(recipe=instance).delete()
             ingredients = validated_data.pop('recipe_ingredients')
             self.create_ingredients(instance, ingredients)
+        else:
+            raise ValidationError('Отсутствует поле ingredients.')
+
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
@@ -378,11 +382,11 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 class FollowSerializer(serializers.ModelSerializer):
     """Сериализатор подписки."""
 
-    id = serializers.ReadOnlyField(source='author.id')
-    username = serializers.ReadOnlyField(source='author.username')
-    email = serializers.ReadOnlyField(source='author.email')
-    first_name = serializers.ReadOnlyField(source='author.first_name')
-    last_name = serializers.ReadOnlyField(source='author.last_name')
+    id = serializers.ReadOnlyField(source='following.id')
+    username = serializers.ReadOnlyField(source='following.username')
+    email = serializers.ReadOnlyField(source='following.email')
+    first_name = serializers.ReadOnlyField(source='following.first_name')
+    last_name = serializers.ReadOnlyField(source='following.last_name')
     is_subscribed = serializers.BooleanField(default=True)
     recipes = serializers.SerializerMethodField(
         method_name='get_recipes',
@@ -406,14 +410,25 @@ class FollowSerializer(serializers.ModelSerializer):
         read_only_fields = ('__all__',)
 
     def get_recipes_count(self, following):
-        return following.author.recipes.count()
+        return following.following.recipes.count()
 
     def get_recipes(self, following):
-        recipes = (Recipe.objects.filter(author=following.author))
+        request = self.context.get('request')
+        recipes_limit = (
+            int(request.query_params.get('recipes_limit'))
+            if request.query_params.get('recipes_limit')
+            else None
+        )
+        recipes = (
+            Recipe.objects.filter(author=following.following)
+            if not recipes_limit
+            else Recipe.objects.filter(author=following.following)
+            [:recipes_limit]
+        )
         serializer = RecipeInListSerializer(
             recipes,
             many=True,
             read_only=True,
-            context={'request': self.context.get('request')},
+            context={'request': self.context.get('request')}
         )
         return serializer.data

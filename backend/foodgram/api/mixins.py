@@ -1,3 +1,4 @@
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, status, viewsets
 from rest_framework.response import Response
@@ -12,7 +13,7 @@ class AddDeleteMixin:
     handlers = {
         'follow': {
             'model': Follow,
-            'fields': ['author_id'],
+            'fields': ['following_id'],
             'error_message': 'Вы уже подписаны на автора.',
             'extra_params': 'many'
         },
@@ -33,7 +34,20 @@ class AddDeleteMixin:
         relation = self.handlers[handler]
         create_obj = relation['model']
         to_relation = relation['fields']
+        if handler == 'favorite' or handler == 'cart':
+            try:
+                from_id = self.queryset.filter(id=id).get()
+            except self.queryset.model.DoesNotExist:
+                return JsonResponse({'error': 'Bad Request'}, status=400)
         from_id = get_object_or_404(self.queryset, id=id)
+
+        if handler == 'follow' and from_id == user:
+            error = 'Нельзя подписаться на самого себя.'
+            return Response(
+                error,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         as_key = dict.fromkeys(to_relation, from_id.id)
         new_obj, create = create_obj.objects.get_or_create(
             user=user,
@@ -58,10 +72,14 @@ class AddDeleteMixin:
         create_obj = relation['model']
         from_id = get_object_or_404(self.queryset, id=id)
         as_key = dict.fromkeys(relation['fields'], from_id.id)
-        get_object_or_404(
-            create_obj, user=self.request.user,
-            **as_key
-        ).delete()
+        try:
+            get_object_or_404(
+                create_obj, user=self.request.user,
+                **as_key
+            ).delete()
+        except Http404:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
