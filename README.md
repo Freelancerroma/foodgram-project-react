@@ -8,3 +8,13 @@ Cайт Foodgram, «Продуктовый помощник». На этом с�
 1. Клонировать репозиторий: git clone git@github.com:freelancerroma/foodgram-project-react.git
 2. Создать файл .env
 3. Добавить необходимые для работы данные в .env
+
+# Образец .env файла
+* SECRET_KEY
+* ALLOWED_HOSTS
+* DEBUG_MODE
+* POSTGRES_DB
+* POSTGRES_USER
+* POSTGRES_PASSWORD
+* DB_HOST
+* DB_PORT
