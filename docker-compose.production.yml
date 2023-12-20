@@ -18,8 +18,8 @@ services:
     image: freelancerroma/foodgram_backend
     env_file: .env
     volumes:
-      - static:/backend_static/
-      - media:/media/ 
+      - static_value:/backend_static/
+      - media_value:/media/ 
     depends_on:
       - db
 
@@ -36,8 +36,8 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
       - ./frontend/build:/usr/share/nginx/html/
       - ./docs/:/usr/share/nginx/html/api/docs/
-      - static:/staticfiles/ 
-      - media:/media/
+      - static_value:/staticfiles/ 
+      - media_value:/media/
     depends_on:
       - backend
       - frontend
