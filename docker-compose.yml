@@ -18,25 +18,28 @@ services:
     build: ./backend/
     env_file: .env
     volumes:
-      - static_value:/app/static/
-      - media_value:/app/media/
+      - static_value:/backend_static
+      - media_value:/media
     depends_on:
       - db
 
   frontend:
-    build: ./frontend/
-    env_file: .env
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     volumes:
-      - ./frontend/:/app/result_build/
+      - ./frontend/:/result_build
 
   gateway:
     build: ./nginx/
-    env_file: .env
     ports:
-      - 9090:80
+      - "9090:80"
     volumes:
-      - static_value:/app/static/
-      - media_value:/app/media/
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./frontend/build:/usr/share/nginx/html/
+      - ./docs/:/usr/share/nginx/html/api/docs/
+      - static_value:/static
+      - media_value:/media
     depends_on:
       - backend
     restart: always
