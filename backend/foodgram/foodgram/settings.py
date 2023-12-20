@@ -3,17 +3,17 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# from decouple import config
+from decouple import config
 
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-%_od4054ate*ttk(l#by7iv%9_-cz3=f!rj_v(3h4il#%o^*oj'
+SECRET_KEY = os.getenv('SECRET_KEY', 'secret')
 
-DEBUG = True
+DEBUG = config('DEBUG_MODE', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['130.193.43.62', '127.0.0.1', 'localhost', 'foodgram-yaroma.ddns.net']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1').split(' ')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
