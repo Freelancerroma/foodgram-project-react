@@ -9,11 +9,11 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'secret')
+SECRET_KEY = 'django-insecure-%_od4054ate*ttk(l#by7iv%9_-cz3=f!rj_v(3h4il#%o^*oj'
 
 DEBUG = False
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1').split(' ')
+ALLOWED_HOSTS = ['130.193.43.62', '127.0.0.1', 'localhost', 'foodgram-yaroma.ddns.net']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
