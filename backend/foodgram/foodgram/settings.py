@@ -12,6 +12,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'secret')
 
 DEBUG = True
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1').split(' ')
 
 INSTALLED_APPS = [
