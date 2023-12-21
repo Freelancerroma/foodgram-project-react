@@ -34,11 +34,12 @@ services:
     ports:
       - "9090:80"
     volumes:
-
       - ./frontend/build:/usr/share/nginx/html/
       - ./docs/:/usr/share/nginx/html/api/docs/
-      - static_value:/var/html/static/
-      - media_value:/var/html/media/
+      - static_value:/staticfiles/ 
+      - media_value:/media/
     depends_on:
+      - db
       - backend
+      - frontend
     restart: always
