@@ -180,7 +180,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
     tags = TagSerializer(many=True,)
     author = UserSerializer()
-    image = Base64ImageField()
+    # image = Base64ImageField()
     ingredients = RecipeIngredientReadSerializer(
         many=True,
         source='recipe_ingredients',
