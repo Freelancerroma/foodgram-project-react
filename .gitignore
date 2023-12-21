@@ -139,4 +139,3 @@ backend/foodgram/recipes/serializers.py
 backend/foodgram/recipes/views.py
 backend/foodgram/recipes/mixins.py
 infra/
-backend/foodgram/media/recipes/media
