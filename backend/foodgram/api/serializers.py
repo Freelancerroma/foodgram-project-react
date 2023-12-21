@@ -1,7 +1,8 @@
-from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
+
+from drf_base64.fields import Base64ImageField
 
 from foodgram import settings
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
