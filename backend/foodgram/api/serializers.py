@@ -1,10 +1,10 @@
 # from drf_extra_fields.fields import Base64ImageField
 import base64
 
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
-from django.core.files.base import ContentFile
 
 from foodgram import settings
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
