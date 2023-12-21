@@ -1,25 +1,24 @@
-version: '3'
+version: '3.3'
 
 volumes:
-  database:
-  static_value:
-  media_value:
+  postgres_data:
+  static:
+  media:
 
 services:
 
   db:
     image: postgres:13
+    env_file: .env
     volumes:
-      - database:/var/lib/postgresql/data
-    env_file:
-      - .env
-
+      - postgres_data:/var/lib/postgresql/data
+  
   backend:
     image: freelancerroma/foodgram_backend
     env_file: .env
     volumes:
-      - static_value:/backend_static/
-      - media_value:/media/ 
+      - static:/backend_static/
+      - media:/media/ 
     depends_on:
       - db
 
@@ -30,15 +29,13 @@ services:
 
   gateway:
     image: freelancerroma/foodgram_gateway
-    env_file: .env
     ports:
-      - "9090:80"
+      - 9090:80
     volumes:
       - ./frontend/build:/usr/share/nginx/html/
       - ./docs/:/usr/share/nginx/html/api/docs/
-      - static_value:/staticfiles/ 
-      - media_value:/media/
+      - static:/staticfiles/ 
+      - media:/media/ 
     depends_on:
-      - backend
       - frontend
-    restart: always
+      - backend
