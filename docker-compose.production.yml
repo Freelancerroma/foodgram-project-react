@@ -38,4 +38,7 @@ services:
       - ./docs/:/usr/share/nginx/html/api/docs/
       - static_value:/staticfiles/ 
       - media_value:/media/
+    depends_on:
+      - frontend
+      - backend
     restart: always
