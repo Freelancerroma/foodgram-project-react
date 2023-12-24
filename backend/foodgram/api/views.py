@@ -210,9 +210,15 @@ def login(request):
         email=serializer.validated_data.get('email')
     )
     if not user.check_password(serializer.validated_data.get('password')):
-        return Response('Неверный пароль', status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {'message': 'Неверный пароль'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
     token, _ = Token.objects.get_or_create(user=user)
-    return Response({'auth_token': str(token)}, status=status.HTTP_200_OK)
+    return Response(
+        {'auth_token': str(token)},
+        status=status.HTTP_200_OK
+    )
 
 
 @api_view(['POST'])

@@ -116,7 +116,7 @@ class TagSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'color',
-            'slug'
+            'slug',
         )
 
 
@@ -278,11 +278,13 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Ингредиенты должны быть заданы.'
             )
-        duplicates = [
-            x for i, x in enumerate(ingredients)
-            if x in ingredients[:i]
+        ingredient_tuples = [
+            (ingredient['ingredient'],
+             ingredient['amount'])
+            for ingredient in ingredients
         ]
-        if duplicates:
+
+        if len(set(ingredient_tuples)) != len(ingredients):
             raise serializers.ValidationError(
                 'Такой ингредиент уже в рецепте.'
             )
@@ -294,11 +296,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Теги должны быть заданы.'
             )
-        duplicates = [
-            x for i, x in enumerate(tags)
-            if x in tags[:i]
-        ]
-        if duplicates:
+        if len(set(tags)) != len(tags):
             raise serializers.ValidationError(
                 'Такой тег уже в рецепте.'
             )
@@ -322,7 +320,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     @staticmethod
     def create_ingredients(recipe, ingredients):
         ingredients.sort(
-            key=lambda ingredient: ingredient.get('ingredient').id
+            key=lambda ingredient: ingredient.get('ingredient').name
         )
         RecipeIngredient.objects.bulk_create(
             [

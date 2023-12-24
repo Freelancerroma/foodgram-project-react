@@ -21,7 +21,7 @@ class Tag(models.Model):
         verbose_name='Цвет тега',
         unique=True,
         max_length=HEX_LEN,
-        validators=[validate_hex],
+        validators=(validate_hex,),
     )
     slug = models.SlugField(
         verbose_name='Слаг тега',
@@ -30,7 +30,7 @@ class Tag(models.Model):
     )
 
     class Meta:
-        ordering = ('name', )
+        ordering = ('name',)
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
 
@@ -95,11 +95,12 @@ class Recipe(models.Model):
         validators=[
             MinValueValidator(
                 MIN_COOKING_TIME,
-                'Время приготовления должно быть больше 0.'
+                'Время приготовления должно быть больше или равно'
+                f'{MIN_COOKING_TIME}.'
             ),
             MaxValueValidator(
                 MAX_COOKING_TIME,
-                'Время приготовления не может быть больше 300.'
+                f'Время приготовления не может быть больше {MAX_COOKING_TIME}.'
             )
         ],
     )
@@ -109,7 +110,7 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ('-pub_date', )
+        ordering = ('-pub_date',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 
@@ -137,11 +138,11 @@ class RecipeIngredient(models.Model):
         validators=[
             MinValueValidator(
                 MIN_INGR_AMOUNT,
-                'Количество должно быть больше 0.'
+                f'Количество должно быть больше или равно{MIN_INGR_AMOUNT}.'
             ),
             MaxValueValidator(
                 MAX_INGR_AMOUNT,
-                'Количество не может быть больше 1000.'
+                f'Количество не может быть больше {MAX_INGR_AMOUNT}.'
             )
         ],
     )
@@ -187,7 +188,7 @@ class Favorite(AbstractFavoriteCart):
     """Модель избранного для рецептов."""
 
     class Meta:
-        ordering = ('user', )
+        ordering = ('user',)
         default_related_name = 'favorites'
         verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
@@ -206,7 +207,7 @@ class ShoppingCart(AbstractFavoriteCart):
     """Модель списка покупок."""
 
     class Meta:
-        ordering = ('user', )
+        ordering = ('user',)
         default_related_name = 'carts'
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзины'
