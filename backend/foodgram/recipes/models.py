@@ -1,8 +1,9 @@
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from foodgram.settings import (HEX_LEN, MEASURE_UNIT_LEN, NAME_LEN, SLUG_LEN,
-                               TAG_LEN)
+                               TAG_LEN, MIN_INGR_AMOUNT, MAX_INGR_AMOUNT,
+                               MIN_COOKING_TIME, MAX_COOKING_TIME)
 from users.models import User
 
 from .validators import validate_hex
@@ -93,8 +94,12 @@ class Recipe(models.Model):
         verbose_name='Время приготовления',
         validators=[
             MinValueValidator(
-                1,
+                MIN_COOKING_TIME,
                 'Время приготовления должно быть больше 0.'
+            ),
+            MaxValueValidator(
+                MAX_COOKING_TIME,
+                'Время приготовления не может быть больше 300.'
             )
         ],
     )
@@ -131,8 +136,12 @@ class RecipeIngredient(models.Model):
         verbose_name='Количество ингредиента',
         validators=[
             MinValueValidator(
-                1,
+                MIN_INGR_AMOUNT,
                 'Количество должно быть больше 0.'
+            ),
+            MaxValueValidator(
+                MAX_INGR_AMOUNT,
+                'Количество не может быть больше 1000.'
             )
         ],
     )

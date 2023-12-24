@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'secret')
 
-DEBUG = config('DEBUG_MODE', default=False, cast=bool)
+DEBUG = True
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1').split(' ')
 
@@ -63,12 +63,8 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'foodgram'),
-        'USER': os.getenv('POSTGRES_USER', 'foodgram'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', ''),
-        'PORT': os.getenv('DB_PORT', 5432)
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -141,3 +137,11 @@ HEX_LEN = 7
 SLUG_LEN = 150
 
 MEASURE_UNIT_LEN = 150
+
+MIN_INGR_AMOUNT = 1
+
+MAX_INGR_AMOUNT = 1000
+
+MIN_COOKING_TIME = 1
+
+MAX_COOKING_TIME = 300

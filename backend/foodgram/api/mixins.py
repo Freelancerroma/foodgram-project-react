@@ -34,11 +34,14 @@ class AddDeleteMixin:
         relation = self.handlers[handler]
         create_obj = relation['model']
         to_relation = relation['fields']
-        if handler == 'favorite' or handler == 'cart':
+        if handler in ['favorite', 'cart']:
             try:
                 from_id = self.queryset.filter(id=id).get()
             except self.queryset.model.DoesNotExist:
-                return JsonResponse({'error': 'Bad Request'}, status=400)
+                return JsonResponse(
+                    {'error': 'Bad Request'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         from_id = get_object_or_404(self.queryset, id=id)
 
         if handler == 'follow' and from_id == user:

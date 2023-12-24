@@ -27,7 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'is_subscribed',
         )
-        read_only_fields = ('__all__',)
+        read_only_fields = fields
 
     def get_is_subscribed(self, obj):
         follower = self.context.get('request').user
@@ -130,7 +130,7 @@ class IngredientSerializer(serializers.ModelSerializer):
             'name',
             'measurement_unit',
         )
-        read_only_fields = ('__all__',)
+        read_only_fields = fields
 
 
 class RecipeIngredientReadSerializer(serializers.ModelSerializer):
@@ -155,7 +155,7 @@ class RecipeIngredientReadSerializer(serializers.ModelSerializer):
             'measurement_unit',
             'amount',
         )
-        read_only_fields = ('__all__',)
+        read_only_fields = fields
 
 
 class RecipeIngredientWriteSerializer(serializers.ModelSerializer):
@@ -165,7 +165,10 @@ class RecipeIngredientWriteSerializer(serializers.ModelSerializer):
         queryset=Ingredient.objects.all(),
         source='ingredient',
     )
-    amount = serializers.IntegerField()
+    amount = serializers.IntegerField(
+        min_value=settings.MIN_INGR_AMOUNT,
+        max_value=settings.MAX_INGR_AMOUNT
+    )
 
     class Meta:
         model = RecipeIngredient
@@ -206,7 +209,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         )
-        read_only_fields = ('__all__',)
+        read_only_fields = fields
 
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
@@ -234,7 +237,7 @@ class RecipeInListSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time',
         )
-        read_only_fields = ('__all__',)
+        read_only_fields = fields
 
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
@@ -275,23 +278,14 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Ингредиенты должны быть заданы.'
             )
-        ingredients_list = []
-        for ingredient in ingredients:
-            amount = ingredient.get('amount')
-            ingredient_id = ingredient.get('ingredient').id
-            if amount < 1:
-                raise serializers.ValidationError(
-                    'Количество ингредиента должно быть больше 0.'
-                )
-            if not Ingredient.objects.filter(id=ingredient_id).exists():
-                raise serializers.ValidationError(
-                    'Ингредиента с таким id нет.'
-                )
-            if ingredient in ingredients_list:
-                raise serializers.ValidationError(
-                    'Такой ингредиент уже в рецепте.'
-                )
-            ingredients_list.append(ingredient)
+        duplicates = [
+            x for i, x in enumerate(ingredients)
+            if x in ingredients[:i]
+        ]
+        if duplicates:
+            raise serializers.ValidationError(
+                'Такой ингредиент уже в рецепте.'
+            )
 
         return ingredients
 
@@ -300,17 +294,14 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Теги должны быть заданы.'
             )
-        tags_list = []
-        for tag in tags:
-            if tag in tags_list:
-                raise serializers.ValidationError(
-                    'Тег уже в рецепте.'
-                )
-            if not Tag.objects.filter(id=tag.id).exists():
-                raise serializers.ValidationError(
-                    'Тега с таким id нет.'
-                )
-            tags_list.append(tag)
+        duplicates = [
+            x for i, x in enumerate(tags)
+            if x in tags[:i]
+        ]
+        if duplicates:
+            raise serializers.ValidationError(
+                'Такой тег уже в рецепте.'
+            )
 
         return tags
 
@@ -391,9 +382,7 @@ class FollowSerializer(serializers.ModelSerializer):
     recipes = serializers.SerializerMethodField(
         method_name='get_recipes',
     )
-    recipes_count = serializers.SerializerMethodField(
-        method_name='get_recipes_count',
-    )
+    recipes_count = serializers.ReadOnlyField(source='following.recipes.count')
 
     class Meta:
         model = Follow
@@ -407,28 +396,22 @@ class FollowSerializer(serializers.ModelSerializer):
             'recipes',
             'recipes_count',
         )
-        read_only_fields = ('__all__',)
-
-    def get_recipes_count(self, following):
-        return following.following.recipes.count()
+        read_only_fields = fields
 
     def get_recipes(self, following):
         request = self.context.get('request')
-        recipes_limit = (
-            int(request.query_params.get('recipes_limit'))
-            if request.query_params.get('recipes_limit')
-            else None
+        recipes_limit = int(
+            request.query_params.get('recipes_limit')
+            or 0
         )
-        recipes = (
-            Recipe.objects.filter(author=following.following)
-            if not recipes_limit
-            else Recipe.objects.filter(author=following.following)
-            [:recipes_limit]
-        )
+        recipes = Recipe.objects.filter(
+            author=following.following
+        )[:recipes_limit]
         serializer = RecipeInListSerializer(
             recipes,
             many=True,
             read_only=True,
-            context={'request': self.context.get('request')}
+            context={'request': request}
         )
+
         return serializer.data
