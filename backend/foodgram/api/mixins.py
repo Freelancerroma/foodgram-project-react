@@ -8,8 +8,6 @@ from users.models import Follow
 
 
 class AddDeleteMixin:
-    """Миксин создания и удаления связей между объектами."""
-
     handlers = {
         'follow': {
             'model': Follow,
@@ -92,6 +90,4 @@ class ListCreateRetrieveViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
-    """ViewSet для методов Get, List, Create, Retrieve."""
-
     lookup_field = 'id'

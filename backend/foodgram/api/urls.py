@@ -1,8 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import (IngredientsViewSet, RecipeViewSet, TagViewSet, UserViewSet,
-                    login, logout)
+from .views import (IngredientsViewSet, RecipeViewSet, TagViewSet, UserViewSet)
 
 app_name = 'api'
 
@@ -14,6 +13,5 @@ v1_router.register(r'ingredients', IngredientsViewSet, basename='ingredients')
 
 urlpatterns = [
     path('', include(v1_router.urls), name='foodgram-api'),
-    path('auth/token/login/', login, name='login'),
-    path('auth/token/logout/', logout, name='logout'),
+    path('auth/', include('djoser.urls.authtoken')),
 ]

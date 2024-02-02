@@ -3,30 +3,31 @@ from django.db import models
 
 from foodgram import settings
 
-from .validators import validate_username
+from django.core.validators import RegexValidator
 
 
 class User(AbstractUser):
-    """Модель пользователя."""
-
     username = models.CharField(
         verbose_name='Имя пользователя',
-        max_length=settings.USERNAME_LEN,
+        max_length=200,
         unique=True,
-        validators=[validate_username],
+        validators=[
+            RegexValidator(regex=r"^[\w.@+-]+$",
+            message="Недопустимый символ")
+        ],
     )
     email = models.EmailField(
         verbose_name='Электронная почта',
-        max_length=settings.EMAIL_LEN,
+        max_length=254,
         unique=True,
     )
     first_name = models.CharField(
         verbose_name='Имя',
-        max_length=settings.FIRST_NAME_LEN,
+        max_length=200,
     )
     last_name = models.CharField(
         verbose_name='Фамилия',
-        max_length=settings.LAST_NAME_LEN,
+        max_length=200,
     )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = (
@@ -45,8 +46,6 @@ class User(AbstractUser):
 
 
 class Follow(models.Model):
-    """Модель подписки."""
-
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

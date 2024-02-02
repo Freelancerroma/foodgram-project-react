@@ -5,14 +5,10 @@ from recipes.models import Recipe
 
 
 class IngredientFilter(filters.SearchFilter):
-    """Фильтр поиска ингредиента по имени."""
-
     search_param = 'name'
 
 
 class RecipeFilter(django_filters.FilterSet):
-    """Фильтр поиска рецептов."""
-
     tags = django_filters.AllValuesMultipleFilter(
         field_name='tags__slug'
     )

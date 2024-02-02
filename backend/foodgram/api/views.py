@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from users.models import User
 from users.permissions import AuthorOrRead
-
+ 
 from .filters import IngredientFilter, RecipeFilter
 from .mixins import AddDeleteMixin, ListCreateRetrieveViewSet
 from .paginators import IngredientPagination, RecipesPagination
@@ -22,16 +22,12 @@ from .serializers import (ChangePasswordSerializer, FollowSerializer,
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
-    """VieSet для тегов."""
-
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
     pagination_class = IngredientPagination
 
 
 class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
-    """ViewSet для ингредиентов."""
-
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
     filter_backends = (IngredientFilter,)
@@ -40,8 +36,6 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(AddDeleteMixin, viewsets.ModelViewSet):
-    """ViewSet для рецептов."""
-
     queryset = Recipe.objects.all()
     lookup_field = 'id'
     permission_classes = (AuthorOrRead,)
@@ -113,8 +107,6 @@ class RecipeViewSet(AddDeleteMixin, viewsets.ModelViewSet):
 
 
 class UserViewSet(AddDeleteMixin, ListCreateRetrieveViewSet):
-    """ViewSet для работы с пользователями."""
-
     queryset = User.objects.all()
     serializer_class = UserSerializer
     filter_backends = (filters.SearchFilter,)

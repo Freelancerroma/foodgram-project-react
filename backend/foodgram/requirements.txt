@@ -1,5 +1,5 @@
 asgiref==3.7.2
-Django==5.0
+Django==4.2.9
 django-filter==23.5
 djangorestframework==3.14.0
 drf-base64==2.0
@@ -17,3 +17,4 @@ python-dotenv==1.0.0
 pytz==2023.3.post1
 sqlparse==0.4.4
 tzdata==2023.3
+djoser==2.2.2

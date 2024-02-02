@@ -10,11 +10,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'secret')
 
-DEBUG = config('DEBUG_MODE', default=False, cast=bool)
-
+DEBUG = False
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1').split(' ')
 
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS').split(' ')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -26,6 +24,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
+    'djoser',
     'users.apps.UsersConfig',
     'api.apps.ApiConfig',
     'recipes.apps.RecipesConfig',
@@ -60,6 +59,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'foodgram.wsgi.application'
+
 
 DATABASES = {
     'default': {
@@ -122,30 +122,14 @@ REST_FRAMEWORK = {
     ],
 }
 
-USERNAME_LEN = 150
 
-EMAIL_LEN = 254
-
-FIRST_NAME_LEN = 150
-
-LAST_NAME_LEN = 150
-
-PASSWORD_LEN = 150
-
-NAME_LEN = 200
-
-TAG_LEN = 150
-
-HEX_LEN = 7
-
-SLUG_LEN = 150
-
-MEASURE_UNIT_LEN = 150
-
-MIN_INGR_AMOUNT = 1
-
-MAX_INGR_AMOUNT = 1000
-
-MIN_COOKING_TIME = 1
-
-MAX_COOKING_TIME = 300
+DJOSER = {
+    "LOGIN_FIELD": "email",
+    "HIDE_USERS": False,
+    "SERIALIZERS": {
+        "user": "api.serializers.UserSerializer",
+        "user_list": "api.serializers.UserSerializer",
+        "current_user": "api.serializers.UserSerializer",
+        "user_create": "api.serializers.UserSerializer",
+    },
+}

@@ -1,32 +1,29 @@
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 
-from foodgram.settings import (HEX_LEN, MAX_COOKING_TIME, MAX_INGR_AMOUNT,
-                               MEASURE_UNIT_LEN, MIN_COOKING_TIME,
-                               MIN_INGR_AMOUNT, NAME_LEN, SLUG_LEN, TAG_LEN)
 from users.models import User
-
-from .validators import validate_hex
 
 
 class Tag(models.Model):
-    """Модель тега."""
-
     name = models.CharField(
         verbose_name='Название тега',
         unique=True,
-        max_length=TAG_LEN,
+        max_length=200,
     )
     color = models.CharField(
         verbose_name='Цвет тега',
         unique=True,
-        max_length=HEX_LEN,
-        validators=(validate_hex,),
-    )
+        max_length=7,
+        validators=[
+            RegexValidator(
+                '^#([a-fA-F0-9]{6})',
+                message='Поле должно содержать HEX-код выбранного цвета.'
+            )]
+    ),
     slug = models.SlugField(
         verbose_name='Слаг тега',
         unique=True,
-        max_length=SLUG_LEN,
+        max_length=200,
     )
 
     class Meta:
@@ -39,15 +36,13 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    """Модель ингредиентов."""
-
     name = models.CharField(
         verbose_name='Название ингредиента',
-        max_length=NAME_LEN,
+        max_length=200,
     )
     measurement_unit = models.CharField(
         verbose_name='Единица измерения',
-        max_length=MEASURE_UNIT_LEN,
+        max_length=200,
     )
 
     class Meta:
@@ -60,8 +55,6 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
-    """Модель рецептов."""
-
     author = models.ForeignKey(
         User,
         verbose_name='Автор',
@@ -70,7 +63,7 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         verbose_name='Название рецепта',
-        max_length=NAME_LEN,
+        max_length=200,
     )
     image = models.ImageField(
         verbose_name='Изображение',
@@ -94,13 +87,12 @@ class Recipe(models.Model):
         verbose_name='Время приготовления',
         validators=[
             MinValueValidator(
-                MIN_COOKING_TIME,
-                'Время приготовления должно быть больше или равно'
-                f'{MIN_COOKING_TIME}.'
+                1,
+                'Время приготовления должно быть больше или равно 1.'
             ),
             MaxValueValidator(
-                MAX_COOKING_TIME,
-                f'Время приготовления не может быть больше {MAX_COOKING_TIME}.'
+                300,
+                'Время приготовления не может быть больше 300.'
             )
         ],
     )
@@ -119,8 +111,6 @@ class Recipe(models.Model):
 
 
 class RecipeIngredient(models.Model):
-    """Модель связи моделей рецептов и ингредиентов."""
-
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт',
@@ -137,12 +127,12 @@ class RecipeIngredient(models.Model):
         verbose_name='Количество ингредиента',
         validators=[
             MinValueValidator(
-                MIN_INGR_AMOUNT,
-                f'Количество должно быть больше или равно{MIN_INGR_AMOUNT}.'
+                1,
+                'Количество должно быть больше или равно 1.'
             ),
             MaxValueValidator(
-                MAX_INGR_AMOUNT,
-                f'Количество не может быть больше {MAX_INGR_AMOUNT}.'
+                1000,
+                'Количество не может быть больше 1000.'
             )
         ],
     )
@@ -167,8 +157,6 @@ class RecipeIngredient(models.Model):
 
 
 class AbstractFavoriteCart(models.Model):
-    """Абстрактная модель для избранного."""
-
     user = models.ForeignKey(
         User,
         verbose_name='Пользователь',
@@ -185,8 +173,6 @@ class AbstractFavoriteCart(models.Model):
 
 
 class Favorite(AbstractFavoriteCart):
-    """Модель избранного для рецептов."""
-
     class Meta:
         ordering = ('user',)
         default_related_name = 'favorites'
@@ -204,8 +190,6 @@ class Favorite(AbstractFavoriteCart):
 
 
 class ShoppingCart(AbstractFavoriteCart):
-    """Модель списка покупок."""
-
     class Meta:
         ordering = ('user',)
         default_related_name = 'carts'
