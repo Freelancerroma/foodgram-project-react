@@ -192,32 +192,32 @@ class UserViewSet(AddDeleteMixin, ListCreateRetrieveViewSet):
         user.save()
 
 
-@api_view(['POST'])
-@permission_classes([permissions.AllowAny])
-def login(request):
-    serializer = UserLoginSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    user = get_object_or_404(
-        get_user_model(),
-        email=serializer.validated_data.get('email')
-    )
-    if not user.check_password(serializer.validated_data.get('password')):
-        return Response(
-            {'message': 'Неверный пароль'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-    token, _ = Token.objects.get_or_create(user=user)
-    return Response(
-        {'auth_token': str(token)},
-        status=status.HTTP_200_OK
-    )
+#@api_view(['POST'])
+#@permission_classes([permissions.AllowAny])
+#def login(request):
+#    serializer = UserLoginSerializer(data=request.data)
+#    serializer.is_valid(raise_exception=True)
+#    user = get_object_or_404(
+#        get_user_model(),
+#        email=serializer.validated_data.get('email')
+#    )
+#    if not user.check_password(serializer.validated_data.get('password')):
+#        return Response(
+#            {'message': 'Неверный пароль'},
+#            status=status.HTTP_400_BAD_REQUEST
+#        )
+#    token, _ = Token.objects.get_or_create(user=user)
+#    return Response(
+#        {'auth_token': str(token)},
+#        status=status.HTTP_200_OK
+#    )
 
 
-@api_view(['POST'])
-@permission_classes([permissions.IsAuthenticated])
-def logout(request):
-    try:
-        request.user.auth_token.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-    except Exception as error:
-        return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
+#@api_view(['POST'])
+#@permission_classes([permissions.IsAuthenticated])
+#def logout(request):
+#    try:
+#        request.user.auth_token.delete()
+#        return Response(status=status.HTTP_204_NO_CONTENT)
+#    except Exception as error:
+#        return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
